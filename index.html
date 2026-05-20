@@ -1,0 +1,297 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);color:var(--color-text-primary)}
+.toolbar{display:flex;align-items:center;gap:8px;padding:12px 0 16px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:16px;flex-wrap:wrap}
+.toolbar-left{display:flex;align-items:center;gap:8px;flex:1}
+.toolbar-right{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;cursor:pointer;transition:background 0.15s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn:disabled{opacity:0.4;cursor:default}
+.btn-primary{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+.btn-primary:hover{opacity:0.85}
+.upload-zone{border:1.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:40px 20px;text-align:center;cursor:pointer;transition:border-color 0.15s;margin-bottom:16px}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--color-border-primary)}
+.upload-zone i{font-size:32px;color:var(--color-text-secondary);display:block;margin-bottom:10px}
+.upload-zone p{color:var(--color-text-secondary);font-size:14px}
+.upload-zone span{color:var(--color-text-info);cursor:pointer}
+.project-list{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;transition:border-color 0.15s}
+.card:hover{border-color:var(--color-border-secondary)}
+.card-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.card-title-wrap{flex:1}
+.title-editable{font-size:15px;font-weight:500;border:none;background:transparent;color:var(--color-text-primary);width:100%;outline:none;padding:2px 4px;border-radius:4px;font-family:var(--font-sans)}
+.title-editable:focus{background:var(--color-background-secondary);outline:1px solid var(--color-border-secondary)}
+.card-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.icon-btn{width:28px;height:28px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-text-secondary);transition:all 0.15s}
+.icon-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.icon-btn.active{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+.merge-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.merge-label{font-size:12px;color:var(--color-text-secondary);white-space:nowrap}
+.merge-select{flex:1;font-size:12px;padding:4px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);max-width:260px}
+.team-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.chip{font-size:11px;padding:2px 8px;background:var(--color-background-secondary);border-radius:100px;color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary)}
+.comments-panel{border-top:0.5px solid var(--color-border-tertiary);padding-top:10px;margin-top:6px;display:none}
+.comments-panel.open{display:block}
+.comment-item{font-size:13px;color:var(--color-text-secondary);padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);white-space:pre-wrap}
+.comment-item:last-child{border-bottom:none}
+.comment-meta{font-size:11px;color:var(--color-text-tertiary);margin-bottom:2px}
+.comment-input-row{display:flex;gap:6px;margin-top:8px}
+.comment-input-row input{flex:1;font-size:13px;padding:5px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.badge{font-size:10px;padding:1px 5px;background:var(--color-background-info);color:var(--color-text-info);border-radius:100px;font-weight:500;min-width:16px;text-align:center}
+.saved-toast{position:fixed;bottom:20px;right:20px;background:var(--color-background-success);color:var(--color-text-success);border:0.5px solid var(--color-border-success);padding:8px 14px;border-radius:var(--border-radius-md);font-size:13px;display:none;z-index:999}
+#file-input{display:none}
+.empty-state{text-align:center;padding:32px 0;color:var(--color-text-secondary);font-size:14px}
+.col-modal{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:1000}
+.col-modal-box{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);padding:20px;width:min(480px,90vw);max-height:80vh;overflow-y:auto}
+.col-modal-box h3{font-size:15px;font-weight:500;margin-bottom:4px}
+.col-modal-box p{font-size:13px;color:var(--color-text-secondary);margin-bottom:14px}
+.col-select-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.col-select-row label{font-size:13px;width:130px;color:var(--color-text-secondary)}
+.col-select-row select{flex:1;font-size:13px;padding:5px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.multi-check{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0}
+.multi-check label{font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;color:var(--color-text-secondary)}
+</style>
+
+<h2 class="sr-only">Project merger app — upload a CSV or Excel file to list, merge, annotate, and export projects</h2>
+
+<div style="padding:0 2px">
+<div class="toolbar">
+  <div class="toolbar-left">
+    <button class="btn" id="undo-btn" disabled onclick="undo()"><i class="ti ti-arrow-back-up" aria-hidden="true"></i>Undo</button>
+    <button class="btn" id="redo-btn" disabled onclick="redo()"><i class="ti ti-arrow-forward-up" aria-hidden="true"></i>Redo</button>
+  </div>
+  <div class="toolbar-right">
+    <button class="btn" onclick="document.getElementById('file-input').click()"><i class="ti ti-upload" aria-hidden="true"></i>Upload</button>
+    <button class="btn btn-primary" onclick="saveState()"><i class="ti ti-device-floppy" aria-hidden="true"></i>Save</button>
+    <button class="btn" onclick="exportCSV()"><i class="ti ti-download" aria-hidden="true"></i>Export CSV</button>
+    <input type="file" id="file-input" accept=".csv,.xlsx,.xls" onchange="handleFile(this.files[0])">
+  </div>
+</div>
+
+<div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="e=>{e.preventDefault();this.classList.add('drag')}" ondragleave="e=>this.classList.remove('drag')" ondrop="handleDrop(event)">
+  <i class="ti ti-file-spreadsheet" aria-hidden="true"></i>
+  <p><span>Click to upload</span> or drag & drop your CSV or Excel file</p>
+  <p style="margin-top:4px;font-size:12px">.csv, .xlsx, .xls supported</p>
+</div>
+
+<div id="project-list" class="project-list"></div>
+<div id="empty-state" class="empty-state" style="display:none"><i class="ti ti-folders" style="font-size:28px;display:block;margin-bottom:8px" aria-hidden="true"></i>No projects loaded yet</div>
+</div>
+
+<div class="saved-toast" id="toast"><i class="ti ti-check" aria-hidden="true"></i> Saved</div>
+
+<div id="col-modal" class="col-modal" style="display:none">
+  <div class="col-modal-box">
+    <h3>Map your columns</h3>
+    <p>We couldn't auto-detect all columns. Please select which columns to use.</p>
+    <div class="col-select-row"><label>Project title column</label><select id="title-col-sel"></select></div>
+    <div class="col-select-row" style="align-items:flex-start"><label style="padding-top:4px">Team member columns</label><div id="team-col-checks" class="multi-check"></div></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:14px">
+      <button class="btn btn-primary" onclick="confirmColMap()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+let projects=[], history=[], future=[], rawHeaders=[], rawRows=[];
+
+function pushHistory(snapshot){history.push(JSON.stringify(snapshot));future=[];updateUndoRedo()}
+function undo(){if(!history.length)return;future.push(JSON.stringify(projects));projects=JSON.parse(history.pop());render();updateUndoRedo()}
+function redo(){if(!future.length)return;history.push(JSON.stringify(projects));projects=JSON.parse(future.shift());render();updateUndoRedo()}
+function updateUndoRedo(){document.getElementById('undo-btn').disabled=!history.length;document.getElementById('redo-btn').disabled=!future.length}
+
+function handleDrop(e){e.preventDefault();document.getElementById('upload-zone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)handleFile(f)}
+
+function handleFile(f){
+  if(!f)return;
+  const ext=f.name.split('.').pop().toLowerCase();
+  const r=new FileReader();
+  r.onload=ev=>{
+    let data;
+    if(ext==='csv'){
+      const text=ev.target.result;
+      const lines=text.split(/\r?\n/).filter(l=>l.trim());
+      rawHeaders=parseCSVLine(lines[0]);
+      rawRows=lines.slice(1).map(l=>parseCSVLine(l));
+    } else {
+      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const arr=XLSX.utils.sheet_to_json(ws,{header:1});
+      rawHeaders=(arr[0]||[]).map(String);
+      rawRows=arr.slice(1);
+    }
+    detectAndLoad();
+  };
+  if(ext==='csv') r.readAsText(f); else r.readAsArrayBuffer(f);
+}
+
+function parseCSVLine(line){
+  const res=[];let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    if(line[i]==='"'){inQ=!inQ}
+    else if(line[i]===','&&!inQ){res.push(cur.trim());cur=''}
+    else cur+=line[i];
+  }
+  res.push(cur.trim());return res;
+}
+
+function detectAndLoad(){
+  const lh=rawHeaders.map(h=>h.toLowerCase());
+  const titleIdx=lh.findIndex(h=>h.includes('title')||h.includes('project')||h.includes('name'));
+  const teamIdxs=lh.reduce((a,h,i)=>{
+    if(i===titleIdx)return a;
+    if(h.includes('member')||h.includes('team')||h.includes('person')||h.includes('lead')||h.includes('manager')||h.includes('staff')||h.includes('assignee'))a.push(i);
+    return a;
+  },[]);
+  if(titleIdx===-1){showColModal();return}
+  if(teamIdxs.length===0){showColModal();return}
+  loadProjects(titleIdx,teamIdxs);
+}
+
+function showColModal(){
+  const sel=document.getElementById('title-col-sel');
+  sel.innerHTML=rawHeaders.map((h,i)=>`<option value="${i}">${h}</option>`).join('');
+  const checks=document.getElementById('team-col-checks');
+  checks.innerHTML=rawHeaders.map((h,i)=>`<label><input type="checkbox" value="${i}"> ${h}</label>`).join('');
+  document.getElementById('col-modal').style.display='flex';
+}
+
+function confirmColMap(){
+  const ti=parseInt(document.getElementById('title-col-sel').value);
+  const teamIdxs=[...document.querySelectorAll('#team-col-checks input:checked')].map(c=>parseInt(c.value));
+  document.getElementById('col-modal').style.display='none';
+  loadProjects(ti,teamIdxs.length?teamIdxs:[]);
+}
+
+function loadProjects(titleIdx,teamIdxs){
+  pushHistory(projects);
+  projects=rawRows.filter(r=>r[titleIdx]&&String(r[titleIdx]).trim()).map((r,i)=>{
+    const title=String(r[titleIdx]||'').trim();
+    const team=teamIdxs.map(ti=>String(r[ti]||'').trim()).filter(Boolean);
+    return {id:Date.now()+i,title,team,mergedWith:[],comments:[]};
+  });
+  document.getElementById('upload-zone').style.display='none';
+  render();
+}
+
+function render(){
+  const el=document.getElementById('project-list');
+  if(!projects.length){el.innerHTML='';document.getElementById('empty-state').style.display='block';return}
+  document.getElementById('empty-state').style.display='none';
+  el.innerHTML=projects.map((p,i)=>cardHTML(p,i)).join('');
+}
+
+function cardHTML(p,i){
+  const others=projects.filter((_,j)=>j!==i);
+  const opts=`<option value="">— merge with —</option>`+others.map(o=>`<option value="${o.id}">${o.title}</option>`).join('');
+  const chips=p.team.map(t=>`<span class="chip">${t}</span>`).join('');
+  const commentCount=p.comments.length;
+  const commentItems=p.comments.map(c=>`<div class="comment-item"><div class="comment-meta">${c.ts}</div>${c.text}</div>`).join('');
+  return `<div class="card" id="card-${p.id}">
+    <div class="card-header">
+      <div class="card-title-wrap">
+        <input class="title-editable" value="${esc(p.title)}" onblur="updateTitle(${p.id},this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+      </div>
+      <div class="card-actions">
+        <button class="icon-btn ${commentCount?'active':''}" title="Comments" onclick="toggleComments(${p.id})" aria-label="Toggle comments">
+          <i class="ti ti-message-circle" aria-hidden="true"></i>
+          ${commentCount?`<span class="badge">${commentCount}</span>`:''}
+        </button>
+      </div>
+    </div>
+    <div class="merge-row">
+      <span class="merge-label">Merge with</span>
+      <select class="merge-select" onchange="mergeProjects(${p.id},this.value);this.value=''">${opts}</select>
+    </div>
+    ${chips?`<div class="team-chips">${chips}</div>`:''}
+    <div class="comments-panel" id="comments-${p.id}">
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px;font-weight:500">Notes</div>
+      <div id="comment-list-${p.id}">${commentItems}</div>
+      <div class="comment-input-row">
+        <input type="text" placeholder="Add a note…" id="comment-input-${p.id}" onkeydown="if(event.key==='Enter')addComment(${p.id})">
+        <button class="icon-btn" onclick="addComment(${p.id})" aria-label="Add comment"><i class="ti ti-send" aria-hidden="true"></i></button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function toggleComments(id){
+  const p=document.getElementById(`comments-${id}`);
+  p.classList.toggle('open');
+}
+
+function addComment(id){
+  const inp=document.getElementById(`comment-input-${id}`);
+  const text=inp.value.trim();
+  if(!text)return;
+  pushHistory(projects);
+  const p=projects.find(p=>p.id===id);
+  if(!p)return;
+  const now=new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  p.comments.push({text,ts:now});
+  inp.value='';
+  const list=document.getElementById(`comment-list-${id}`);
+  list.innerHTML=p.comments.map(c=>`<div class="comment-item"><div class="comment-meta">${c.ts}</div>${c.text}</div>`).join('');
+  const panel=document.getElementById(`comments-${id}`);
+  panel.classList.add('open');
+  const btn=panel.previousElementSibling.querySelector('.icon-btn');
+  if(btn){btn.classList.add('active');btn.innerHTML=`<i class="ti ti-message-circle" aria-hidden="true"></i><span class="badge">${p.comments.length}</span>`}
+}
+
+function updateTitle(id,val){
+  const p=projects.find(p=>p.id===id);
+  if(!p||p.title===val)return;
+  pushHistory(projects);
+  p.title=val;
+  updateMergeDropdowns();
+}
+
+function mergeProjects(id,targetId){
+  if(!targetId)return;
+  const src=projects.find(p=>p.id===id);
+  const tgt=projects.find(p=>p.id===parseInt(targetId));
+  if(!src||!tgt)return;
+  pushHistory(projects);
+  src.title=src.title+' + '+tgt.title;
+  src.team=[...new Set([...src.team,...tgt.team])];
+  src.comments=[...src.comments,...tgt.comments];
+  projects=projects.filter(p=>p.id!==parseInt(targetId));
+  render();
+}
+
+function updateMergeDropdowns(){
+  projects.forEach((_,i)=>{
+    const card=document.getElementById(`card-${projects[i].id}`);
+    if(!card)return;
+    const sel=card.querySelector('.merge-select');
+    if(!sel)return;
+    const others=projects.filter((_,j)=>j!==i);
+    sel.innerHTML=`<option value="">— merge with —</option>`+others.map(o=>`<option value="${o.id}">${o.title}</option>`).join('');
+  });
+}
+
+function saveState(){
+  try{localStorage.setItem('pm_projects',JSON.stringify(projects))}catch(e){}
+  const t=document.getElementById('toast');
+  t.style.display='flex';t.style.alignItems='center';t.style.gap='6px';
+  setTimeout(()=>t.style.display='none',2000);
+}
+
+function exportCSV(){
+  if(!projects.length)return;
+  const rows=[['Project Title','Team Members','Notes'],...projects.map(p=>[
+    p.title,
+    p.team.join('; '),
+    p.comments.map(c=>c.text).join(' | ')
+  ])];
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='projects_merged.csv';a.click();
+}
+
+try{const s=localStorage.getItem('pm_projects');if(s){projects=JSON.parse(s);if(projects.length){document.getElementById('upload-zone').style.display='none';render()}}}catch(e){}
+</script>
